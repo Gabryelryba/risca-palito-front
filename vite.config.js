@@ -13,5 +13,6 @@ export default defineConfig({
   test: {
     // Compile the package's .svelte.js files (runes) for the tests too.
     server: { deps: { inline: ['arcade-hub-ui'] } },
+    setupFiles: ['./src/test-setup.js'],
   },
 })
