@@ -64,11 +64,11 @@
     margin: 0;
     padding: 1.1rem 2rem 1.4rem;
     border-radius: var(--radius-lg);
-    background: rgba(3, 6, 13, 0.78);
+    background: var(--scrim);
     border: 1px solid var(--line-strong);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    box-shadow: var(--shadow), inset 0 1px 0 rgba(207, 224, 255, 0.06);
+    box-shadow: var(--shadow), inset 0 1px 0 var(--sheen-strong);
     font-weight: 800;
     font-size: clamp(2.8rem, 12vw, 5.2rem);
     line-height: 1;
