@@ -1,5 +1,5 @@
 <script>
-  // A small looping picture of the game for the hub card: the board, and every
+  // A small looping picture of the game for the landing page: the board, and every
   // few seconds a slash that crosses the second row. CSS only, no JS timers.
   const ROWS = [7, 5, 3, 1];
 </script>

@@ -21,3 +21,18 @@ describe("the game's texts match in both languages", () => {
     }
   });
 });
+
+describe("How to play", () => {
+  test("3 or 4 steps in each language, each with a title and a text", () => {
+    for (const lang of ["en", "pt-BR"]) {
+      const steps = messages[lang].stickSlash.steps;
+      expect(steps.length, lang).toBeGreaterThanOrEqual(3);
+      expect(steps.length, lang).toBeLessThanOrEqual(4);
+      for (const step of steps) {
+        expect(step.title, lang).toBeTruthy();
+        expect(step.text, lang).toBeTruthy();
+      }
+    }
+    expect(messages.en.stickSlash.steps.length).toBe(messages["pt-BR"].stickSlash.steps.length);
+  });
+});

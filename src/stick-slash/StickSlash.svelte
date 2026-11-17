@@ -1,8 +1,6 @@
 <script>
   import { onMount, onDestroy, untrack } from "svelte";
   import ArrowLeft from "phosphor-svelte/lib/ArrowLeft";
-  import Plus from "phosphor-svelte/lib/Plus";
-  import SignIn from "phosphor-svelte/lib/SignIn";
   import Robot from "phosphor-svelte/lib/Robot";
   import LinkSimple from "phosphor-svelte/lib/LinkSimple";
   import Check from "phosphor-svelte/lib/Check";
@@ -15,19 +13,20 @@
   import EndgameOverlay from "./EndgameOverlay.svelte";
   import Preview from "./Preview.svelte";
   import Versus from "arcade-hub-ui/Versus.svelte";
-  import { t, serverMessage } from "arcade-hub-ui/i18n/index.svelte.js";
+  import GameLanding from "arcade-hub-ui/GameLanding.svelte";
+  import { t, tList, serverMessage } from "arcade-hub-ui/i18n/index.svelte.js";
 
   const GAME_ID = "stick-slash";
 
+  // Props come from GameApp (arcade-hub-ui), which mounts the game.
   // inviteCode: a room code from an invite link, joined as soon as we connect.
   // ensureName(): resolves to the player's display name, asking for it the first
-  // time; null if they back out.
+  // time; null if they back out. editName(): opens the dialog to change it.
   let {
-    onExit,
     inviteCode: invitedTo = null,
     onInviteUsed = () => {},
-    onSwitchGame = () => false,
     ensureName = async () => null,
+    editName = null,
     playerName = null,
   } = $props();
 
@@ -42,7 +41,6 @@
   let errorMessage = $state("");
 
   let roomCode = $state("");
-  let joinCodeInput = $state("");
   let joinError = $state("");
   let vsAI = $state(false);
   let showJoinForm = $state(false);
@@ -55,7 +53,6 @@
   let gameOverSoundPlayed = false;
   let resumeFailures = 0;
   let boardSlot;
-  let joinInput;
 
   // Read once: the invite is joined on the first connection only, not on later reconnects.
   let inviteCode = untrack(() => invitedTo);
@@ -134,12 +131,10 @@
     status = "hosting";
   }
 
-  // Server refusals come with a code, translated here into what to do next.
+  // Server refusals come with a code, shown on the landing page with the code
+  // form open. A code from another game's room is refused as room-not-found.
   function handleJoinError(refusal) {
-    const { gameId } = refusal;
-    // The code belongs to another game in the hub: open that game with it.
-    if (gameId && gameId !== GAME_ID && onSwitchGame(gameId, roomCode)) return;
-    joinError = gameId && gameId !== GAME_ID ? t("errors.join.other-game") : serverMessage("join", refusal);
+    joinError = serverMessage("join", refusal);
     status = "menu";
     showJoinForm = true;
   }
@@ -155,7 +150,6 @@
     rematchState = "idle";
     joinError = "";
     showJoinForm = false;
-    joinCodeInput = "";
   }
 
   // Same room, fresh board. The "state" event that follows carries the new sticks.
@@ -258,29 +252,6 @@
     socket.emit("playVsComputer", { gameId: GAME_ID, name });
   }
 
-  function openJoinForm() {
-    joinError = "";
-    showJoinForm = true;
-    requestAnimationFrame(() => joinInput?.focus());
-  }
-
-  function closeJoinForm() {
-    showJoinForm = false;
-    joinCodeInput = "";
-    joinError = "";
-  }
-
-  function joinRoom(evt) {
-    evt.preventDefault();
-    const code = joinCodeInput.trim();
-    if (code.length !== 5) {
-      joinError = t("common.roomCodeLength");
-      joinInput?.focus();
-      return;
-    }
-    sendJoin(code);
-  }
-
   // Against the computer this starts a game at once; against a person it asks them first.
   function playAgain() {
     if (status !== "ended") return;
@@ -294,7 +265,7 @@
   }
 
   // Leave the room (the server closes it when the socket goes) and come back to
-  // this game's menu on a fresh connection.
+  // the landing page on a fresh connection.
   function leaveRoom() {
     status = "connecting";
     reconnecting = false;
@@ -307,8 +278,8 @@
     socket.connect();
   }
 
-  // Leaving a live match against a person ends it for them too, so it takes a
-  // second tap. Anywhere else the back button just goes.
+  // Leave goes back to the landing page. Leaving a live match against a person
+  // ends it for them too, so it takes a second tap. Anywhere else it just goes.
   function handleBack() {
     const liveMatch = status === "playing" && !vsAI;
     if (liveMatch && !confirmLeave) {
@@ -316,7 +287,7 @@
       setTimeout(() => (confirmLeave = false), 3500);
       return;
     }
-    onExit();
+    leaveRoom();
   }
 
   async function copyInviteLink() {
@@ -384,92 +355,45 @@
 </script>
 
 <main class="screen" class:shake={didLose} class:in-game={inGame}>
-  <header class="topbar">
-    <button
-      class="btn btn-ghost back"
-      class:btn-danger={confirmLeave}
-      onclick={handleBack}
-      aria-label={confirmLeave ? t("stickSlash.leaveGameAria") : t("common.backToHub")}
-    >
-      <ArrowLeft size={18} weight="light" aria-hidden="true" />
-      <span>{confirmLeave ? t("stickSlash.leaveGame") : "Recreio"}</span>
-    </button>
-    {#if inGame || status === "hosting" || status === "joining"}
-      <span class="game-name" translate="no">{t("games.stick-slash.name")}</span>
-    {/if}
-  </header>
+  {#if inGame || status === "hosting" || status === "joining"}
+    <header class="topbar">
+      <button
+        class="btn btn-ghost back"
+        class:btn-danger={confirmLeave}
+        onclick={handleBack}
+        aria-label={confirmLeave ? t("stickSlash.leaveGameAria") : t("stickSlash.leaveAria")}
+      >
+        <ArrowLeft size={18} weight="light" aria-hidden="true" />
+        <span>{confirmLeave ? t("stickSlash.leaveGame") : t("stickSlash.leave")}</span>
+      </button>
+      <span class="game-name" translate="no">{t("stickSlash.name")}</span>
+    </header>
+  {/if}
 
   {#if status === "menu" || status === "connecting"}
-    <section class="menu">
-      <div class="menu-copy">
-        <p class="eyebrow">{t("stickSlash.eyebrow")}</p>
-        <h1 translate="no">{t("games.stick-slash.name")}</h1>
-        <p class="lede">{t("stickSlash.lede")}</p>
-
-        {#if status === "connecting"}
-          <p class="connecting" role="status" aria-live="polite">
-            <span class="pulse" aria-hidden="true"></span>
-            {slowServer ? t("common.waking") : t("common.connecting")}
-          </p>
-        {/if}
-
-        {#if !showJoinForm}
-          <div class="actions">
-            <button class="btn btn-primary" onclick={createRoom} disabled={status === "connecting"}>
-              <Plus size={18} weight="light" aria-hidden="true" />
-              {t("common.createRoom")}
-            </button>
-            <button class="btn btn-secondary" onclick={openJoinForm} disabled={status === "connecting"}>
-              <SignIn size={18} weight="light" aria-hidden="true" />
-              {t("common.joinWithCode")}
-            </button>
-            <button class="btn btn-ghost" onclick={playVsComputer} disabled={status === "connecting"}>
-              <Robot size={18} weight="light" aria-hidden="true" />
-              {t("stickSlash.playVsComputer")}
-            </button>
-          </div>
-          {#if joinError}
-            <p class="error" role="alert">{joinError}</p>
-          {/if}
-        {:else}
-          <form class="join-form" onsubmit={joinRoom} novalidate>
-            <label for="room-code">{t("common.roomCode")}</label>
-            <div class="join-row">
-              <input
-                id="room-code"
-                bind:this={joinInput}
-                class="code-input"
-                class:invalid={joinError}
-                type="text"
-                name="room-code"
-                inputmode="text"
-                placeholder="K7Q2M…"
-                autocomplete="off"
-                autocapitalize="characters"
-                spellcheck="false"
-                enterkeyhint="go"
-                maxlength="5"
-                aria-describedby={joinError ? "room-code-error" : "room-code-help"}
-                aria-invalid={joinError ? "true" : undefined}
-                bind:value={joinCodeInput}
-                oninput={() => (joinCodeInput = joinCodeInput.toUpperCase())}
-              />
-              <button class="btn btn-primary" type="submit" disabled={status === "connecting"}>{t("common.joinRoom")}</button>
-            </div>
-            {#if joinError}
-              <p id="room-code-error" class="error" role="alert">{joinError}</p>
-            {:else}
-              <p id="room-code-help" class="help">{t("common.roomCodeHelp")}</p>
-            {/if}
-            <button class="btn btn-ghost cancel" type="button" onclick={closeJoinForm}>{t("common.cancel")}</button>
-          </form>
-        {/if}
-      </div>
-
-      <div class="menu-art" aria-hidden="true">
-        <Preview />
-      </div>
-    </section>
+    <GameLanding
+      gameId={GAME_ID}
+      eyebrow={t("stickSlash.eyebrow")}
+      title={t("stickSlash.name")}
+      lede={t("stickSlash.lede")}
+      steps={tList("stickSlash.steps")}
+      connecting={status === "connecting"}
+      {slowServer}
+      bind:joinError
+      bind:showJoinForm
+      onCreate={createRoom}
+      onJoin={sendJoin}
+      {playerName}
+      onEditName={editName}
+    >
+      {#snippet art()}<Preview />{/snippet}
+      {#snippet actions()}
+        <button class="btn btn-ghost" onclick={playVsComputer} disabled={status === "connecting"}>
+          <Robot size={18} weight="light" aria-hidden="true" />
+          {t("stickSlash.playVsComputer")}
+        </button>
+      {/snippet}
+    </GameLanding>
   {:else if status === "joining"}
     <section class="center-state" aria-busy="true">
       <p class="status-line" role="status" aria-live="polite">
@@ -642,129 +566,11 @@
     }
   }
 
-  /* ---- Menu ---- */
-  .menu {
-    flex: 1;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 2rem;
-    padding-top: 2rem;
-    align-content: start;
-  }
-
-  .menu-copy {
-    display: grid;
-    gap: 1rem;
-    align-content: start;
-    max-width: 34rem;
-  }
-
-  h1 {
-    font-size: clamp(2.6rem, 8vw, 4rem);
-    line-height: 1;
-    font-weight: 700;
-    letter-spacing: -0.04em;
-  }
-
-  .lede {
-    color: var(--ink-muted);
-    font-size: 1.05rem;
-    max-width: 48ch;
-  }
-
-  .connecting {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    color: var(--ink-muted);
-    font-size: 0.95rem;
-  }
-
   .actions {
     display: flex;
     flex-wrap: wrap;
     gap: 0.6rem;
     margin-top: 0.75rem;
-  }
-
-  .join-form {
-    display: grid;
-    gap: 0.5rem;
-    margin-top: 0.75rem;
-    max-width: 26rem;
-  }
-
-  label {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--ink);
-  }
-
-  .join-row {
-    display: flex;
-    gap: 0.6rem;
-  }
-
-  .code-input {
-    flex: 1 1 0;
-    min-width: 0;
-    min-height: 3rem;
-    padding: 0 0.9rem;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--line-strong);
-    background: var(--bg-deep);
-    font-family: var(--font-mono);
-    font-weight: 700;
-    font-size: 1.15rem;
-    letter-spacing: 0.32em;
-    text-transform: uppercase;
-    transition: border-color 0.18s var(--ease-out);
-  }
-
-  .code-input::placeholder {
-    color: var(--ink-faint);
-    letter-spacing: 0.32em;
-  }
-
-  .code-input:focus-visible {
-    outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-soft);
-  }
-
-  .code-input.invalid {
-    border-color: var(--danger);
-  }
-
-  .cancel {
-    justify-self: start;
-    margin-left: -0.6rem;
-  }
-
-  .menu-art {
-    display: grid;
-    place-items: center;
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--line);
-    background:
-      radial-gradient(70% 90% at 50% 100%, var(--gold-soft), transparent 70%),
-      var(--bg-deep);
-    min-height: 15rem;
-  }
-
-  @media (min-width: 900px) {
-    .menu {
-      grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
-      column-gap: clamp(2.5rem, 6vw, 5rem);
-      align-items: center;
-      align-content: center;
-      padding-top: 0;
-      padding-bottom: 3rem;
-    }
-
-    .menu-art {
-      min-height: 26rem;
-    }
   }
 
   /* ---- Joining / hosting ---- */
