@@ -7,7 +7,7 @@ import StickSlash from "./stick-slash/StickSlash.svelte";
 
 // The game's own texts first: the page reads them as soon as it mounts.
 registerMessages(messages);
-document.title = t("games.stick-slash.name");
+document.title = t("stickSlash.name");
 
 const app = mount(GameApp, {
   target: document.getElementById("app"),
