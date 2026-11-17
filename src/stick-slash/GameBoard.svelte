@@ -441,7 +441,7 @@
       var(--board-bg);
     border-radius: var(--radius-lg);
     border: 1px solid var(--line);
-    box-shadow: var(--shadow), inset 0 1px 0 rgba(207, 224, 255, 0.04);
+    box-shadow: var(--shadow), inset 0 1px 0 var(--sheen);
     transition: opacity 0.25s var(--ease-out);
   }
   canvas.disabled {
