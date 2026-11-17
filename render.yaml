@@ -6,19 +6,10 @@ services:
   - type: web
     name: risca-palito
     runtime: static
-    # arcade-hub-ui is a private repository: GITHUB_TOKEN (fine-grained,
-    # read-only, only arcade-hub-ui) lets npm fetch it. package-lock.json may
-    # record it as https, git+ssh or git@ addresses, so all three are rewritten.
-    buildCommand: >-
-      git config --global url."https://x-access-token:${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"
-      && git config --global --add url."https://x-access-token:${GITHUB_TOKEN}@github.com/".insteadOf "ssh://git@github.com/"
-      && git config --global --add url."https://x-access-token:${GITHUB_TOKEN}@github.com/".insteadOf "git@github.com:"
-      && npm ci && npm run build
+    # arcade-hub-ui is a public repository: npm fetches it over HTTPS, no token needed.
+    buildCommand: npm ci && npm run build
     staticPublishPath: dist
     pullRequestPreviewsEnabled: false
     envVars:
       - key: VITE_SERVER_URL
         value: https://arcade-hub-back.onrender.com
-      # Asked for when the Blueprint is created; never commit it.
-      - key: GITHUB_TOKEN
-        sync: false
