@@ -1,60 +1,7 @@
-// Risca Palito's own texts, added over the shared ones from arcade-hub-ui
-// (registerMessages in main.js). Keys must match in both languages: see
-// i18n.test.js.
+// Risca Palito's own texts, in Brazilian Portuguese, added over the shared
+// ones from arcade-hub-ui (registerMessages in main.js).
 
-const en = {
-  meta: {
-    description: "Stick Slash: misère Nim for two in the browser. Take turns crossing sticks; whoever crosses the last one loses. Play a friend or the computer, no account needed.",
-  },
-
-  stickSlash: {
-    name: "Stick Slash",
-    leave: "Leave",
-    leaveAria: "Leave the room and go back to the start",
-    // "How to play" on the landing page, read with tList().
-    steps: [
-      { title: "Sticks in rows", text: "The board starts with rows of 7, 5, 3 and 1 sticks. Two players take turns." },
-      { title: "Slash in one stroke", text: "On your turn, drag across one row and cross as many neighbouring sticks as you like: one, a few, or the whole row." },
-      { title: "Don't take the last one", text: "Whoever crosses the last stick on the board loses. Leave it to the other player." },
-      { title: "A friend or the computer", text: "Create a room and send the link to a friend, or play against the computer right away." },
-    ],
-    eyebrow: "Misère Nim · 2 players",
-    lede: "Take turns crossing sticks. In one move, slash as many neighbouring sticks of a single row as you like. Whoever crosses the last stick loses.",
-    playVsComputer: "Play vs Computer",
-    leaveGame: "Leave Game?",
-    leaveGameAria: "Leave the game: tap again to confirm",
-    yourRoom: "Your room",
-    cancelRoom: "Cancel Room",
-    hostingHelp: "Your opponent joins with the link or with the code. Keep this screen open: it stays awake while you wait.",
-    waitingForOpponent: "Waiting for an opponent…",
-    connectionLost: "Connection lost. Create a new room.",
-    roomExpired: "The room expired. Create a new one.",
-    opponentLeft: "{name} left the game.",
-    wantsRematch: "{name} wants to play again.",
-    waitingAccept: "Waiting for {name} to accept…",
-    declined: "{name} declined.",
-    theyCrossedLast: "{name} crossed the last stick.",
-    youCrossedLast: "You crossed the last stick.",
-    yourTurn: "Your turn. Drag across one row.",
-    theirTurn: "{name}’s turn…",
-    computer: "Computer",
-    opponent: "Opponent",
-    won: "Won",
-    vs: "vs",
-    players: "Players",
-    accept: "Accept",
-    waiting: "Waiting…",
-    decline: "Decline",
-    mainMenu: "Main Menu",
-    wellPlayed: "Well played",
-    gameOver: "Game over",
-    youWin: "You Win",
-    youLose: "You Lose",
-    boardLabel: "Stick board, sticks left per row: {rows}",
-  },
-};
-
-const ptBR = {
+export default {
   meta: {
     description: "Risca Palito: Nim misère para dois no navegador. Risquem palitos em turnos; quem riscar o último perde. Jogue com um amigo ou contra o computador, sem cadastro.",
   },
@@ -106,4 +53,3 @@ const ptBR = {
   },
 };
 
-export default { en, "pt-BR": ptBR };

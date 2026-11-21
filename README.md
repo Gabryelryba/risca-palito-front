@@ -1,6 +1,6 @@
 # risca-palito-front
 
-Risca Palito (Stick Slash em inglês) é um site independente: Nim misère para dois. Os jogadores riscam palitos de uma fileira em turnos; quem riscar o último perde. Dá para jogar com um amigo, por código de sala, ou contra o computador.
+Risca Palito é um site independente: Nim misère para dois. Os jogadores riscam palitos de uma fileira em turnos; quem riscar o último perde. Dá para jogar com um amigo, por código de sala, ou contra o computador.
 
 Este repositório é só o site do jogo. O servidor é o [arcade-hub-back](https://github.com/Gabryelryba/arcade-hub-back) (id do jogo: `stick-slash`), compartilhado com os outros jogos. O código comum (componentes, socket, i18n, estilos) vem do pacote [arcade-hub-ui](https://github.com/Gabryelryba/arcade-hub-ui).
 
@@ -26,7 +26,7 @@ Precisa do [arcade-hub-back](https://github.com/Gabryelryba/arcade-hub-back) rod
 
 - `src/main.js`: registra os textos do jogo e monta a página (`GameApp` do `arcade-hub-ui`) com o jogo
 - `src/stick-slash/`: o jogo
-- `src/i18n.js`: textos próprios do jogo, em português e inglês
+- `src/i18n.js`: textos próprios do jogo, em português
 
 ## Outros comandos
 
@@ -38,7 +38,7 @@ npm run preview  # serve o build
 
 ## Landing page
 
-A primeira tela do site é a landing page do jogo (`GameLanding` do `arcade-hub-ui`): o nome, a chamada e o tabuleiro animado (`Preview.svelte`), **Criar Sala**, **Entrar com Código**, **Jogar contra o Computador** e a seção "Como jogar". Os passos de "Como jogar" ficam em `stickSlash.steps` no `src/i18n.js`, nos dois idiomas.
+A primeira tela do site é a landing page do jogo (`GameLanding` do `arcade-hub-ui`): o nome, a chamada e o tabuleiro animado (`Preview.svelte`), **Criar Sala**, **Entrar com Código**, **Jogar contra o Computador** e a seção "Como jogar". Os passos de "Como jogar" ficam em `stickSlash.steps` no `src/i18n.js`.
 
 Não existe mais o hub Recreio: o site não leva a outros jogos, e sair de uma sala ou partida volta para a landing page. Um código de sala de outro jogo é recusado pelo servidor como sala inexistente.
 
